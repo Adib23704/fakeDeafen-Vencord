@@ -37,7 +37,7 @@ class FakeDeafen {
     private refresh_voice_state() {
         const ChannelStore = findByProps("getChannel", "getDMFromUserId");
         const SelectedChannelStore = findByProps("getVoiceChannelId");
-        const GatewayConnection = findByProps("voiceStateUpdate", "voiceServerPing"); // voiceServerPing really usefull ?
+        const GatewayConnection = findByProps("voiceStateUpdate", "voiceServerPing");
         const MediaEngineStore = findByProps("isDeaf", "isMute");
         if (!GatewayConnection || !SelectedChannelStore) return;
 
@@ -74,44 +74,23 @@ class FakeDeafen {
         </svg>`;
     }
 
-    private find_discord_mute_button(): HTMLElement | null {
-        // target user panels
-        const panels = document.querySelector('[class^="panels_"]');
-        if (!panels) return null;
-        const buttons = panels.querySelectorAll('button');
-        // return the first button in user panels 
-        return buttons.length > 0 ? buttons[0] : null;
-    }
-
     private mount_fake_deafen_button() {
-        // stop if already present
-        if (document.getElementById("fd-btn")) return;
-        
-        const mute_btn = this.find_discord_mute_button();
-        if (!mute_btn) return;
+        const discord_mute_button = document.querySelector('[aria-label="Mute"]');
+        if (!discord_mute_button || document.getElementById("fd-btn")) return;
 
-        // base button creation
-        const fake_btn = document.createElement("button");
-        fake_btn.id = "fd-btn";
-        fake_btn.className = mute_btn.className;
-        fake_btn.setAttribute("aria-label", "Fake Deafen");
+        const fake_deafen_button = document.createElement("button");
+        fake_deafen_button.id = "fd-btn";
+        fake_deafen_button.className = (discord_mute_button as HTMLElement).className;
+        fake_deafen_button.setAttribute("aria-label", "Fake Deafen");
+        fake_deafen_button.innerHTML = `<div class="contents__201d5">${this.get_icon_svg(this.is_fake_deafen_enabled)}</div>`;
 
-        // render function to avoid repetition
-        const update_view = () => {
-            const inner_class = mute_btn.querySelector('div')?.className || '';
-            fake_btn.innerHTML = `<div class="${inner_class}">${this.get_icon_svg(this.is_fake_deafen_enabled)}</div>`;
-        };
-
-        // click handling
-        fake_btn.onclick = () => {
+        fake_deafen_button.onclick = () => {
             this.is_fake_deafen_enabled = !this.is_fake_deafen_enabled;
-            update_view();
+            fake_deafen_button.querySelector(".contents__201d5")!.innerHTML = this.get_icon_svg(this.is_fake_deafen_enabled);
             this.refresh_voice_state();
         };
 
-        // init and insertion
-        update_view();
-        mute_btn.parentElement?.insertBefore(fake_btn, mute_btn);
+        discord_mute_button.parentElement?.insertBefore(fake_deafen_button, discord_mute_button);
     }
 }
 
@@ -119,8 +98,8 @@ const instance = new FakeDeafen();
 
 export default definePlugin({
     name: "FakeDeafen",
-    description: "Fake deafen yourself",
-    authors: [{ name: "hyyven", id: 449282863582412850n }],
+    description: "Fake deafen toggle with optimized payload update",
+    authors: [{ name: "Waleed", id: 547060993885470720n }, { name: "hyyven", id: 449282863582412850n }],
 
     start() {
         instance.start();
