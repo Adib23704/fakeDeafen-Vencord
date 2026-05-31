@@ -126,8 +126,8 @@ export default definePlugin({
         {
             find: ".DISPLAY_NAME_STYLES_COACHMARK)",
             replacement: {
-                match: /children:\[(?=.{0,25}?accountContainerRef)/,
-                replace: "children:[$self.fd_button(arguments[0]),"
+                match: /(\(0,[a-z]\.jsx\)\(\w+,\{accountContainerRef)/,
+                replace: "$self.fd_button(arguments[0]),$1"
             }
         }
     ],
